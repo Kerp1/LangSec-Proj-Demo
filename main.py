@@ -21,7 +21,7 @@ facebook = oauth.remote_app("facebook",
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return "Hello World!<b><a href = /login?next=/authenticated>Login</a>"
 
 @app.route("/thisishax")
 def thisishax():
@@ -36,11 +36,9 @@ def login():
 
 @app.route('/authenticated')
 def authenticated():
-  next_url = url_for("thisishax", token=get_facebook_oauth_token())
-  print("---------------------------------------------------------------")
-  print (next_url)
-  print("---------------------------------------------------------------")
-  return redirect(next_url)
+  me = facebook.get('/me')
+  return 'Logged in as id=%s name=%s' % \
+        (me.data['id'], me.data['name'])
 
 
 @app.route('/oauth-authorized')
@@ -55,12 +53,8 @@ def oauth_authorized(resp):
 
 
     session['oauth_token'] = (resp['access_token'], '')
-    me = facebook.get('/me')
     flash('You were successfully logged in')
-    #return('Logged in as id=%s redirect=%s' % \
-    #    (me.data, request.args.get('next')))
-
-    return redirect(url_for(next_url, access_token=resp['access_token']))
+    return redirect(next_url + "?token=" + resp['access_token'])
 
 @facebook.tokengetter
 def get_facebook_oauth_token():
