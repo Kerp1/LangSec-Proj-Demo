@@ -1,15 +1,15 @@
 from flask import Flask
 from flask import session
-from flask import *
 from flask_oauthlib.client import OAuth
 
-app = Flask(__name__)
-app.secret_key = 'super secret key'
+APP = Flask(__name__)
+APP.secret_key = 'super secret key'
 
 
-oauth = OAuth()
+OAUTH = OAuth()
 
-facebook = oauth.remote_app("facebook",
+FACEBOOK = OAUTH.remote_app(
+    "FACEBOOK",
     base_url='https://graph.facebook.com/',
     request_token_url=None,
     access_token_url='/oauth/access_token',
@@ -19,30 +19,32 @@ facebook = oauth.remote_app("facebook",
     request_token_params={'scope': 'email'}
 )
 
-@app.route("/")
+@APP.route("/")
 def hello():
     return "Hello World!<b><a href = /login?next=/authenticated>Login</a>"
 
-@app.route("/thisishax")
+@APP.route("/thisishax")
 def thisishax():
-  return request.args.get("token")
+    return .args.get("token")
 
 
-@app.route('/login')
+@APP.route('/login')
 def login():
-    return facebook.authorize(callback=url_for('oauth_authorized', _external=True,
+    return FACEBOOK.authorize(callback=url_for(
+        'oauth_authorized',
+        _external=True,
         next=request.args.get('next') or request.referrer or None))
 
 
-@app.route('/authenticated')
+@APP.route('/authenticated')
 def authenticated():
-  me = facebook.get('/me')
-  return 'Logged in as id=%s name=%s' % \
+    me = FACEBOOK.get('/me')
+    return 'Logged in as id=%s name=%s' % \
         (me.data['id'], me.data['name'])
 
 
-@app.route('/oauth-authorized')
-@facebook.authorized_handler
+@APP.route('/oauth-authorized')
+@FACEBOOK.authorized_handler
 def oauth_authorized(resp):
     next_url = request.args.get('next')
     if resp is None:
@@ -56,11 +58,9 @@ def oauth_authorized(resp):
     flash('You were successfully logged in')
     return redirect(next_url + "?token=" + resp['access_token'])
 
-@facebook.tokengetter
+@FACEBOOK.tokengetter
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
 if __name__ == "__main__":
-    app.run()
-
-
+    APP.run()
