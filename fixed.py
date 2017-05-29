@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, url_for, request, flash, redirect
 from flask import session
 from flask_oauthlib.client import OAuth
 
@@ -25,7 +25,7 @@ def hello():
 
 @APP.route("/thisishax")
 def thisishax():
-    return .args.get("token")
+    return request.args.get("token")
 
 
 @APP.route('/login')
@@ -51,12 +51,10 @@ def oauth_authorized(resp):
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    print(resp)
-
-
-    session['oauth_token'] = (resp['access_token'], '')
     flash('You were successfully logged in')
-    return redirect(next_url + "?token=" + resp['access_token'])
+    session['oauth_token'] = (resp['access_token'], '')
+
+    return redirect(url_for('authenticated'))
 
 @FACEBOOK.tokengetter
 def get_facebook_oauth_token():
